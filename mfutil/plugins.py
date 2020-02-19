@@ -13,6 +13,7 @@ from mfutil import BashWrapperException, BashWrapperOrRaise, BashWrapper
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from mfutil.layerapi2 import LayerApi2Wrapper
 from opinionated_configparser import OpinionatedConfigParser
+from gitignore_parser import parse_gitignore
 
 RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', '/tmp')
 MFEXT_HOME = os.environ.get('MFEXT_HOME', '/opt/metwork-mfext')
@@ -528,9 +529,13 @@ def install_plugin(plugin_filepath, plugins_base_dir=None,
 
 
 def _make_plugin_spec(dest_file, name, version, summary, license, packager,
-                      vendor, url):
+                      vendor, url, excludes):
     with open(SPEC_TEMPLATE, "r") as f:
         template = f.read()
+
+    for line in excludes:
+        template = template + '\n%exclude /metwork_plugin/%{name}/' + line
+
     extra_vars = {"NAME": name, "VERSION": version, "SUMMARY": summary,
                   "LICENSE": license, "PACKAGER": packager, "VENDOR": vendor,
                   "URL": url}
@@ -600,18 +605,32 @@ def _is_dev_link_plugin(name, plugins_base_dir=None):
     return os.path.islink(home)
 
 
-def build_plugin(plugin_path, plugins_base_dir=None):
+def build_plugin(plugin_path, plugins_base_dir=None, ignored_files_path=None):
     """Build a plugin.
 
     Args:
         plugin_path (string): the plugin path to build
         plugins_base_dir (string): (optional) the plugin base directory path.
             If not set, the default plugins base directory path is used.
+        ignored_files_path (string) : file listing files to ignore
+            (gitignore like). If not set, no file is ignored.
 
     Raises:
         MFUtilPluginCantBuild: if a error occurs during build
 
     """
+    # Check for files or directories to exclude from built plugin
+    excludes = []
+    if ignored_files_path is not None and os.path.isfile(ignored_files_path):
+        matches = parse_gitignore(ignored_files_path)
+        for r, d, f in os.walk(plugin_path):
+            for folder in d:
+                if matches(folder):
+                    excludes.append("%s" % folder)
+            for file in f:
+                if matches(file):
+                    excludes.append("%s" % file)
+
     plugin_path = os.path.abspath(plugin_path)
     plugins_base_dir = _get_plugins_base_dir(plugins_base_dir)
     base = os.path.join(plugins_base_dir, "base")
@@ -640,7 +659,7 @@ def build_plugin(plugin_path, plugins_base_dir=None):
     mkdir_p_or_die(os.path.join(tmpdir, "RPMS"))
     mkdir_p_or_die(os.path.join(tmpdir, "SRPMS"))
     _make_plugin_spec(os.path.join(tmpdir, "specfile.spec"), name, version,
-                      summary, license, packager, vendor, url)
+                      summary, license, packager, vendor, url, excludes)
     cmd = "source %s/lib/bash_utils.sh ; " % MFEXT_HOME
     cmd = cmd + "layer_load rpm@mfext ; "
     cmd = cmd + 'rpmbuild --define "_topdir %s" --define "pwd %s" ' \
