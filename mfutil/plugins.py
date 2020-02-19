@@ -619,19 +619,19 @@ def build_plugin(plugin_path, plugins_base_dir=None, ignored_files_path=None):
         MFUtilPluginCantBuild: if a error occurs during build
 
     """
+    plugin_path = os.path.abspath(plugin_path)
     # Check for files or directories to exclude from built plugin
     excludes = []
     if ignored_files_path is not None and os.path.isfile(ignored_files_path):
         matches = parse_gitignore(ignored_files_path)
         for r, d, f in os.walk(plugin_path):
             for folder in d:
-                if matches(folder):
+                if matches(plugin_path + '/' + folder):
                     excludes.append("%s" % folder)
             for file in f:
-                if matches(file):
+                if matches(plugin_path + '/' + file):
                     excludes.append("%s" % file)
 
-    plugin_path = os.path.abspath(plugin_path)
     plugins_base_dir = _get_plugins_base_dir(plugins_base_dir)
     base = os.path.join(plugins_base_dir, "base")
     pwd = os.getcwd()
