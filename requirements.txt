@@ -7,7 +7,7 @@ bash
 psutil
 inotify_simple==1.2.1; python_version < '3.0'
 inotify_simple; python_version >= '3.0'
---git+https://github.com/metwork-framework/envtpl.git#egg=envtpl
+git+https://github.com/metwork-framework/envtpl.git#egg=envtpl;
 netifaces
 simpleeval==0.9.10
 gitignore_parser
