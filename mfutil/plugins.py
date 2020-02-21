@@ -628,13 +628,13 @@ def build_plugin(plugin_path, plugins_base_dir=None, ignored_files_path=None):
             for folder in d:
                 if matches(os.path.join(plugin_path, r, folder)):
                     excludes.append("%s" %
-                        os.path.relpath(os.path.join(r,folder),
-                                        start=plugin_path))
+                                    os.path.relpath(os.path.join(r, folder),
+                                                    start=plugin_path))
             for file in f:
                 if matches(os.path.join(plugin_path, r, file)):
                     excludes.append("%s" %
-                        os.path.relpath(os.path.join(r,file),
-                                        start=plugin_path))
+                                    os.path.relpath(os.path.join(r, file),
+                                                    start=plugin_path))
 
     plugins_base_dir = _get_plugins_base_dir(plugins_base_dir)
     base = os.path.join(plugins_base_dir, "base")
