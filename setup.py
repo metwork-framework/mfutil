@@ -10,6 +10,7 @@ with open('requirements.txt') as reqs:
 setup(
     name='mfutil',
     packages=find_packages(),
+    install_requires=install_requires,
     entry_points={
         "console_scripts": [
             "get_ip_for_hostname = mfutil.cli_tools.get_ip_for_hostname:main",
