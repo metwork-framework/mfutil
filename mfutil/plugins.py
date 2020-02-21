@@ -626,11 +626,15 @@ def build_plugin(plugin_path, plugins_base_dir=None, ignored_files_path=None):
         matches = parse_gitignore(ignored_files_path)
         for r, d, f in os.walk(plugin_path):
             for folder in d:
-                if matches(plugin_path + '/' + folder):
-                    excludes.append("%s" % folder)
+                if matches(os.path.join(plugin_path, r, folder)):
+                    excludes.append("%s" %
+                        os.path.relpath(os.path.join(r,folder),
+                                        start=plugin_path))
             for file in f:
-                if matches(plugin_path + '/' + file):
-                    excludes.append("%s" % file)
+                if matches(os.path.join(plugin_path, r, file)):
+                    excludes.append("%s" %
+                        os.path.relpath(os.path.join(r,file),
+                                        start=plugin_path))
 
     plugins_base_dir = _get_plugins_base_dir(plugins_base_dir)
     base = os.path.join(plugins_base_dir, "base")
