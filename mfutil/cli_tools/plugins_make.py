@@ -13,13 +13,16 @@ def main():
     arg_parser = argparse.ArgumentParser(description=DESCRIPTION)
     arg_parser.add_argument("--plugin-path", default=".",
                             help="plugin directory path")
+    arg_parser.add_argument("--ignored-files-path", default=None,
+                            help="files to ignore (gitignore like)")
     arg_parser.add_argument("--show-plugin-path", action="store_true",
                             default=False,
                             help="show the generated plugin path")
     args = arg_parser.parse_args()
     echo_running("- Building plugin...")
     try:
-        path = build_plugin(args.plugin_path)
+        path = build_plugin(args.plugin_path,
+                            ignored_files_path=args.ignored_files_path)
     except MFUtilPluginCantBuild as e:
         echo_nok()
         print(e)
