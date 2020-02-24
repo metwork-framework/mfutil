@@ -40,11 +40,12 @@ def eval(expr, variables=None):
 
     Args:
         expr (string): the python expression to eval.
-        variables (dict): if set, inject some variables/values in the
-            expression.
+        variables (dict): if set, inject some variables/values
+            in the expression.
 
     """
-    s = SandboxedEval(operators=None, names=variables)
+
+    s = SandboxedEval(names=variables)
     return s.eval(expr)
 
 

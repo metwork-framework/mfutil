@@ -1,6 +1,7 @@
 import re
 import fnmatch
 import functools
+import ast
 import sys
 
 from simpleeval import EvalWithCompoundTypes, DEFAULT_FUNCTIONS
@@ -18,6 +19,20 @@ LOCAL_FUNCTIONS = {
 LOCAL_FUNCTIONS.update(DEFAULT_FUNCTIONS)
 
 
+class _Eval(EvalWithCompoundTypes):
+
+    def __init__(self,  operators=None, functions=None, names=None):
+        super().__init__(operators, functions, names)
+
+        self.nodes.update({
+            ast.Bytes: self._eval_bytes,
+        })
+
+    @staticmethod
+    def _eval_bytes(node):
+        return node.s.decode()
+
+
 def _partialclass(cls, *args, **kwargs):
 
     class NewCls(cls):
@@ -29,4 +44,4 @@ def _partialclass(cls, *args, **kwargs):
     return NewCls
 
 
-SandboxedEval = _partialclass(EvalWithCompoundTypes, functions=LOCAL_FUNCTIONS)
+SandboxedEval = _partialclass(_Eval, functions=LOCAL_FUNCTIONS)
