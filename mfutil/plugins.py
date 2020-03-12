@@ -640,6 +640,9 @@ def build_plugin(plugin_path, plugins_base_dir=None, ignored_files_path=None):
     base = os.path.join(plugins_base_dir, "base")
     pwd = os.getcwd()
     parser = OpinionatedConfigParser()
+    # FIXME: remove __ special handling
+    parser.optionxform = lambda x: x[1:].lower() \
+        if x.startswith('_') and not x.startswith('__') else x.lower()
     with open(os.path.join(plugin_path, "config.ini"), "r") as f:
         config_content = f.read()
     if six.PY2:
