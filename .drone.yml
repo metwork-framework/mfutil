@@ -9,8 +9,9 @@ pipeline:
       - mkdir -p /opt/metwork-mfext/lib
       - pip install -r dev-requirements.txt
       - python setup.py develop
-      - cd tests && rm -f test_plugins.py && nosetests -s . && cd ..
-      - flake8 .
+      - cd tests && rm -f test_plugins.py && nosetests -s . || exit 1 
+      - cd ..
+      - flake8 . || exit 1
       - if test "${PYTHON_VERSION}" != "3.7-buster"; then exit 0; fi
       - pdoc --html mfutil
   publish:
