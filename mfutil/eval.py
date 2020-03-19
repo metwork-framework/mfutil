@@ -39,6 +39,8 @@ def _partialclass(cls, *args, **kwargs):
         if sys.version_info.major >= 3:
             __init__ = functools.partialmethod(cls.__init__, *args, **kwargs)
         else:
+            # FIXME : this does not work with python2
+            # We can't use functools.partial on __init__ function
             __init__ = functools.partial(cls.__init__, *args, **kwargs)
 
     return NewCls
