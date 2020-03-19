@@ -643,6 +643,7 @@ def build_plugin(plugin_path, plugins_base_dir=None, ignored_files_path=None):
     # FIXME: remove __ special handling
     parser.optionxform = lambda x: x[1:].lower() \
         if x.startswith('_') and not x.startswith('__') else x.lower()
+    abort = False
     with open(os.path.join(plugin_path, "config.ini"), "r") as f:
         config_content = f.read()
     if six.PY2:
@@ -651,15 +652,76 @@ def build_plugin(plugin_path, plugins_base_dir=None, ignored_files_path=None):
         parser.read_string(config_content)
     with open(os.path.join(plugin_path, ".layerapi2_label"), "r") as f:
         name = f.read().replace('plugin_', '', 1).split('@')[0]
-    version = parser['general']['version']
-    summary = parser['general']['summary']
-    license = parser['general']['license']
-    try:
+    if 'version' in parser['general']:
+        version = parser['general']['version']
+        if not version:
+            print("\nversion must not be left empty, " +
+                  "please fix it in config.ini\n")
+            abort = True
+    else:
+        print("\nversion tag is mandatory, " +
+              "please add the 'version: ' line in config.ini\n")
+        abort = True
+    if 'summary' in parser['general']:
+        summary = parser['general']['summary']
+        if not summary:
+            print("\nsummary must not be left empty, " +
+                  "please fix it in config.ini\n")
+            abort = True
+    else:
+        print("\nsummary tag is mandatory, " +
+              "please add the 'summary: ' line in config.ini\n")
+        abort = True
+    if 'license' in parser['general']:
+        license = parser['general']['license']
+        if not license:
+            print("\nlicense must not be left empty, " +
+                  "please fix it in config.ini\n")
+            abort = True
+    else:
+        print("\nlicense tag is mandatory, " +
+              "please add the 'license: ' line in config.ini\n")
+        abort = True
+    if 'packager' in parser['general']:
         packager = parser['general']['packager']
-    except Exception:
+        if not packager:
+            print("\npackager (or maintainer) must not be left empty, " +
+                  "please fix it in config.ini\n")
+            abort = True
+    elif 'maintainer' in parser['general']:
         packager = parser['general']['maintainer']
-    vendor = parser['general']['vendor']
-    url = parser['general']['url']
+        if not packager:
+            print("\npackager (or maintainer) must not be left empty, " +
+                  "please fix it in config.ini\n")
+            abort = True
+    else:
+        print("\npackager (or maintainer) tag is mandatory, please " +
+              "add the 'packager: ' or 'maintainer: ' line in config.ini\n")
+        abort = True
+    if 'vendor' in parser['general']:
+        vendor = parser['general']['vendor']
+        if not vendor:
+            print("\nvendor must not be left empty, " +
+                  "please fix it in config.ini\n")
+            abort = True
+    else:
+        print("\nvendor tag is mandatory, " +
+              "please add the 'url: ' line in config.ini\n")
+        abort = True
+    if 'url' in parser['general']:
+        url = parser['general']['url']
+        if not url:
+            print("\nurl must not be left empty, " +
+                  "please fix it in config.ini\n")
+            abort = True
+    else:
+        print("\nurl tag is mandatory, " +
+              "please add the 'url: ' line in config.ini\n")
+        abort = True
+
+    if abort:
+        exit(1)
+
     tmpdir = os.path.join(RUNTIME_HOME, "tmp",
                           "plugin_%s" % get_unique_hexa_identifier())
     mkdir_p_or_die(os.path.join(tmpdir, "BUILD"))
