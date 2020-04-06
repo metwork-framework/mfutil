@@ -353,10 +353,10 @@ class BashWrapperException(Exception):
 
     def __repr__(self):
         if self.__bash_wrapper is not None:
-            return "BashWrapperException with message: %s and debug: %s" % \
-                (self.__message, self.__bash_wrapper)
+            return "%s exception with message: %s and debug: %s" % \
+                (self.__class__.__name__, self.__message, self.__bash_wrapper)
         else:
-            return "BashWrapperException with message: %s" % self.__message
+            return Exception.__repr__(self)
 
     def __str__(self):
         return self.__repr__()
