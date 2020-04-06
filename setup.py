@@ -1,5 +1,4 @@
 import fastentrypoints  # noqa: F401
-import six
 import sys
 from setuptools import setup
 from setuptools import find_packages
@@ -22,7 +21,7 @@ with open('requirements.txt') as reqs:
         else:
             required.append(line)
 
-if six.PY3:
+if sys.version_info > (3, 0, 0):
     required.append("inotify_simple")
 else:
     required.append("inotify_simple==1.2.1")
