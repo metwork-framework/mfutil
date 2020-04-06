@@ -1,17 +1,37 @@
 import fastentrypoints  # noqa: F401
+import six
+import sys
 from setuptools import setup
 from setuptools import find_packages
 
+required = []
+dependency_links = []
+EGG_MARK = '#egg='
 with open('requirements.txt') as reqs:
-    install_requires = [
-        line for line in reqs.read().split('\n')
-        if (line and not line.startswith('--')) and (";" not in line)
-        and not line.startswith('git+https')]
+    for line in reqs.read().split('\n'):
+        if line.startswith('-e git:') or line.startswith('-e git+') or \
+                line.startswith('git:') or line.startswith('git+'):
+            if EGG_MARK in line:
+                package_name = line[line.find(EGG_MARK) + len(EGG_MARK):]
+                required.append(package_name)
+                dependency_links.append(line)
+            else:
+                print('Dependency to a git repository should have the format:')
+                print('git+ssh://git@github.com/xxxxx/xxxxxx#egg=package_name')
+                sys.exit(1)
+        else:
+            required.append(line)
+
+if six.PY3:
+    required.append("inotify_simple")
+else:
+    required.append("inotify_simple==1.2.1")
 
 setup(
     name='mfutil',
     packages=find_packages(),
-    install_requires=install_requires,
+    install_requires=required,
+    dependency_links=dependency_links,
     entry_points={
         "console_scripts": [
             "get_ip_for_hostname = mfutil.cli_tools.get_ip_for_hostname:main",
