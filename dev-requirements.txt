@@ -3,3 +3,5 @@ flake8
 mock
 nose
 pdoc3
+pytest
+pytest-cov
