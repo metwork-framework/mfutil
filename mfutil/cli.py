@@ -66,7 +66,7 @@ def echo_warning(message=""):
     _get_mfutil().mfutil_echo_warning(message.encode('utf8'))
 
 
-def echo_bold(message):
+def echo_bold(message=""):
     """Write a message in bold (if supported).
 
     Args:
