@@ -23,8 +23,6 @@ jobs:
     - name: Install dev dependencies
       run: |
         python -m pip install --upgrade pip
-        wget -O /usr/lib/libmfutil.so http://metwork-framework.org/pub/misc/mfutil_c/libmfutil.so
-        wget -O /usr/lib/liblayerapi2.so http://metwork-framework.org/pub/misc/mfutil_c/liblayerapi2.so
         pip install -r dev-requirements.txt
     - name: install
       run: |
