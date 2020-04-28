@@ -36,7 +36,10 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --statistics
     - name: Tests
       run: |
+        env | grep PATH
         export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+        env | grep PATH
+        ls -l
         cd tests && rm -f test_plugins.py && nosetests -s .
     - name: Doc
       run: |
