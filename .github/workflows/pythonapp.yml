@@ -12,7 +12,6 @@ on:
 jobs:
   build:
 
-    echo "::add-path::.::{ld_library_path}"
     runs-on: ubuntu-latest
 
     steps:
