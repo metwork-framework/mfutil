@@ -37,7 +37,7 @@ jobs:
     - name: Tests
       run: |
         export LD_LIBRARY_PATH=..
-        cd tests && rm -f test_plugins.py && nosetests --with-coverage --coverage-html -s .
+        cd tests && rm -f test_plugins.py && nosetests --with-coverage --cover-html -s .
     - name: Doc
       run: |
         make doc
