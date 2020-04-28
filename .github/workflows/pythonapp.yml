@@ -38,6 +38,8 @@ jobs:
       uses: CyberZHG/github-action-python-test@master
       with:
         args: -s
+        env:
+          LD_LIBRARY_PATH=..:.:${LD_LIBRARY_PATH}
     - name: Doc
       run: |
         make doc
