@@ -12,6 +12,7 @@ on:
 jobs:
   build:
 
+    echo "::add-path::.::{ld_library_path}"
     runs-on: ubuntu-latest
 
     steps:
@@ -35,11 +36,11 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --statistics
     - name: Tests
+      run: |
+        export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
       uses: CyberZHG/github-action-python-test@master
       with:
         args: -s
-        env:
-          LD_LIBRARY_PATH=..:.:${LD_LIBRARY_PATH}
     - name: Doc
       run: |
         make doc
