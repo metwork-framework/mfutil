@@ -35,7 +35,7 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --statistics
     - name: Tests
-      uses: actions/python-nose-test
+      uses: CyberZHG@github-action-python-test@master
     - name: Doc
       run: |
         make doc
