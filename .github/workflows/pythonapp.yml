@@ -36,6 +36,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --statistics
     - name: Tests
       uses: CyberZHG/github-action-python-test@master
+      args: -s
     - name: Doc
       run: |
         make doc
