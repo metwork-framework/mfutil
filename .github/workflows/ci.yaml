@@ -42,9 +42,11 @@ jobs:
       run: |
         nosetests --with-coverage --cover-html --cover-html-dir=htmlcov --cover-package=mfutil -s tests
     - name: Doc
+      if: ${{ matrix.python-version }} == 3.7
       run: |
         make doc
     - name: Publish doc 1
+      if: ${{ matrix.python-version }} == 3.7
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.PUB_HOST }}
@@ -55,6 +57,7 @@ jobs:
           rm -Rf doc
           mkdir doc
     - name: Publish doc 2
+      if: ${{ matrix.python-version }} == 3.7
       uses: garygrossgarten/github-action-scp@release
       with:
         local: html/mfutil
@@ -63,6 +66,7 @@ jobs:
         username: ${{ secrets.PUB_USERNAME }}
         password: ${{ secrets.PUB_PASSWORD }}
     - name: Publish coverage 1
+      if: ${{ matrix.python-version }} == 3.7
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.PUB_HOST }}
@@ -73,6 +77,7 @@ jobs:
           rm -Rf coverage
           mkdir coverage
     - name: Publish coverage 2
+      if: ${{ matrix.python-version }} == 3.7
       uses: garygrossgarten/github-action-scp@release
       with:
         local: htmlcov
