@@ -27,7 +27,6 @@ jobs:
     - name: Install dev dependencies
       run: |
         python -m pip install --upgrade pip
-        sudo wget -O /usr/lib/x86_64-linux-gnu/libmfutil.so http://metwork-framework.org/pub/misc/mfutil_c/libmfutil.so
         pip install -r dev-requirements.txt
     - name: install
       run: |

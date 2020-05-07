@@ -2,38 +2,52 @@
 
 from __future__ import print_function
 import six
+import os
 import sys
-import ctypes
-
-MFUTIL_INSTANCE = None
+from mfutil.exc import MFUtilException
 
 
-def _get_mfutil():
-    global MFUTIL_INSTANCE
-    if MFUTIL_INSTANCE is None:
-        i = ctypes.cdll.LoadLibrary("libmfutil.so")
-        i.mfutil_echo_ok.restype = None
-        i.mfutil_echo_ok.argtypes = [ctypes.c_char_p]
-        i.mfutil_is_interactive_execution.restype = ctypes.c_int
-        i.mfutil_is_interactive_execution.argtypes = []
-        i.mfutil_echo_nok.restype = None
-        i.mfutil_echo_nok.argtypes = [ctypes.c_char_p]
-        i.mfutil_echo_warning.restype = None
-        i.mfutil_echo_warning.argtypes = [ctypes.c_char_p]
-        i.mfutil_echo_bold.restype = None
-        i.mfutil_echo_bold.argtypes = [ctypes.c_char_p]
-        i.mfutil_echo_running.restype = None
-        i.mfutil_echo_running.argtypes = []
-        i.mfutil_echo_clean.restype = None
-        i.mfutil_echo_clean.argtypes = []
-        MFUTIL_INSTANCE = i
-    return MFUTIL_INSTANCE
+def is_interactive(target=None):
+    """Return True if we are in an interactive terminal.
 
+    For historical reasons, the following algorithm is used to determine
+    if we are in an interactive terminal or not:
 
-def is_interactive():
-    """Return True if we are in an interactive terminal."""
-    tmp = _get_mfutil().mfutil_is_interactive_execution()
-    return (tmp == 1)
+    - if the `NOINTERACTIVE` env var is set to 1 => we return False
+    - if the `/tmp/nointeractive` file exists => we return False
+    - if target is None:
+        - if stdout AND stderr are a tty => we return True (else False)
+    - elif target == "stdout":
+        - if stdout is a tty => we return True (else False)
+    - elif target == "stderr":
+        - if stderr is a tty => we return True (else False)
+    - else:
+        - we raise a MFUtilException
+
+    Args:
+        target (string): can be None (for stdout AND stderr checking),
+            "stdout" (for stdout checking only or "stderr" (for stderr checking
+            only).
+
+    Returns:
+        boolean (True (interactive) or False (non-interactive).
+
+    Raises:
+        MFUtilException: if target is invalid
+
+    """
+    if os.environ.get("NOINTERACTIVE", "").strip() == "1":
+        return False
+    if os.path.isfile("/tmp/nointeractive"):
+        return False
+    if target is None:
+        return sys.stdout.isatty() and sys.stderr.isatty()
+    elif target == "stdout":
+        return sys.stdout.isatty()
+    elif target == "stderr":
+        return sys.stderr.isatty()
+    else:
+        raise MFUtilException("invalid target parameter: %s" % target)
 
 
 def echo_ok(message=""):
@@ -43,7 +57,11 @@ def echo_ok(message=""):
         message (string): little optional message.
 
     """
-    _get_mfutil().mfutil_echo_ok(message.encode('utf8'))
+    if is_interactive("stdout"):
+        echo_clean()
+        print("\033[60G[ \033[32mOK\033[0;0m ] %s" % message)
+    else:
+        print(" [ OK ] %s" % message)
 
 
 def echo_nok(message=""):
@@ -53,7 +71,11 @@ def echo_nok(message=""):
         message (string): little optional message.
 
     """
-    _get_mfutil().mfutil_echo_nok(message.encode('utf8'))
+    if is_interactive("stdout"):
+        echo_clean()
+        print("\033[60G[ \033[31mERROR\033[0;0m ] %s" % message)
+    else:
+        print(" [ ERROR ] %s" % message)
 
 
 def echo_warning(message=""):
@@ -63,7 +85,11 @@ def echo_warning(message=""):
         message (string): little optional message.
 
     """
-    _get_mfutil().mfutil_echo_warning(message.encode('utf8'))
+    if is_interactive("stdout"):
+        echo_clean()
+        print("\033[60G[ \033[33mWARNING\033[0;0m ] %s" % message)
+    else:
+        print( "[ WARNING ] %s" % message)
 
 
 def echo_bold(message):
@@ -73,7 +99,10 @@ def echo_bold(message):
         message (string): message to write in bold.
 
     """
-    _get_mfutil().mfutil_echo_bold(message.encode('utf8'))
+    if is_interactive("stdout"):
+        print("\033[1m%s\033[0m" % message)
+    else:
+        print(message)
 
 
 def echo_running(message=None):
@@ -86,17 +115,21 @@ def echo_running(message=None):
         message (string): little optional message.
 
     """
-    if message is None:
-        _get_mfutil().mfutil_echo_running()
-    else:
-        if six.PY2:
-            print(message, end="")
-            sys.stdout.flush()
+    if message is not None:
+        if is_interactive("stdout"):
+            if six.PY2:
+                print(message, end="")
+                sys.stdout.flush()
+            else:
+                print(message, end="", flush=True)
         else:
-            print(message, end="", flush=True)
-        _get_mfutil().mfutil_echo_running()
+            print(message, end="")
+    if is_interactive("stdout"):
+        echo_clean()
+        print("\033[60G[ \033[33mRUNNING\033[0;0m ]", end="")
 
 
 def echo_clean():
     """Clean waiting status."""
-    _get_mfutil().mfutil_echo_clean()
+    if is_interactive("stdout"):
+        print("\033[60G[ \033           ", end="")
