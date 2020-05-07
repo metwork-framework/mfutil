@@ -42,18 +42,18 @@ class TestCase1(TestCase):
         shutil.rmtree(tmp)
 
     def test_get_ipv4_for_hostname(self):
-        self.assertEquals(get_ipv4_for_hostname('localhost'), '127.0.0.1')
-        self.assertEquals(get_ipv4_for_hostname('localhost.localdomain'),
+        self.assertEqual(get_ipv4_for_hostname('localhost'), '127.0.0.1')
+        self.assertEqual(get_ipv4_for_hostname('localhost.localdomain'),
                           '127.0.0.1')
-        self.assertEquals(get_ipv4_for_hostname('127.0.0.1'), '127.0.0.1')
-        self.assertEquals(get_ipv4_for_hostname('1.2.3.4'), '1.2.3.4')
+        self.assertEqual(get_ipv4_for_hostname('127.0.0.1'), '127.0.0.1')
+        self.assertEqual(get_ipv4_for_hostname('1.2.3.4'), '1.2.3.4')
         x = get_ipv4_for_hostname('foo.bar.doesnotexist')
         self.assertTrue(x is None)
         x = get_ipv4_for_hostname('www.google.com')
         self.assertTrue(x is not None)
         self.assertTrue(len(x) >= 4)
         y = x.split('.')
-        self.assertEquals(len(y), 4)
+        self.assertEqual(len(y), 4)
 
     def test_get_recursive_mtime(self):
         mtime = get_recursive_mtime(".", ignores=["foo", "*.py"])
@@ -104,7 +104,7 @@ class TestCase1(TestCase):
         self.assertTrue(x1 != x2)
         self.assertTrue(x1 != x3)
         self.assertTrue(x2 != x3)
-        self.assertEquals(x3, x4)
+        self.assertEqual(x3, x4)
         self.assertTrue(isinstance(x1, string_types))
         self.assertTrue(isinstance(x2, string_types))
         self.assertTrue(isinstance(x3, string_types))

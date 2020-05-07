@@ -12,12 +12,12 @@ class TestCaseNet(TestCase):
 
     def test_get_ip_for_hostname_auto(self):
         tmp = get_ip_for_hostname("AUTO")
-        self.assertEquals(tmp, "AUTO")
+        self.assertEqual(tmp, "AUTO")
         self.assertTrue(isinstance(tmp, str))
 
     def test_get_ip_for_hostname_localhost(self):
         tmp = get_ip_for_hostname("localhost")
-        self.assertEquals(tmp, "127.0.0.1")
+        self.assertEqual(tmp, "127.0.0.1")
         self.assertTrue(isinstance(tmp, str))
 
     def test_get_ip_for_hostname_not_found(self):
@@ -65,7 +65,7 @@ class TestCaseNet(TestCase):
             f.write("domain foo.bar\n")
         tmp = _get_domainname_from_resolv_conf(tmp_file)
         self.assertTrue(isinstance(tmp, str))
-        self.assertEquals(tmp, "foo.bar")
+        self.assertEqual(tmp, "foo.bar")
         os.unlink(tmp_file)
 
     def test_ping_tcp_port1(self):
@@ -92,4 +92,4 @@ class TestCaseNet(TestCase):
         res = ping_tcp_port("foobar", 80, timeout=2)
         self.assertTrue(res)
         self.assertTrue(fake_socket_object.close_called)
-        self.assertEquals(fake_socket_object.timeout_set, 2)
+        self.assertEqual(fake_socket_object.timeout_set, 2)
