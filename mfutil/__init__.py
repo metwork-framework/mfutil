@@ -1,9 +1,7 @@
 """Generic utility classes and functions."""
 
 __pdoc__ = {
-    "mfutil.layerapi2": False,
     "mfutil.jinja2_extensions": False,
-    "mfutil.glib2": False,
     "mfutil.cli_tools": False,
     "mfutil.eval": False,
     "BashWrapper": False,
