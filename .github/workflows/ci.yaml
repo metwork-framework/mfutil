@@ -39,7 +39,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --statistics
     - name: Tests and Coverage
       run: |
-        nosetests --with-coverage --cover-html --cover-html-dir=htmlcov --cover-package=mfutil -s tests
+        make test
     - name: Doc
       if: ${{ matrix.python-version == 3.7 }}
       run: |
@@ -64,6 +64,10 @@ jobs:
         host: ${{ secrets.PUB_HOST }}
         username: ${{ secrets.PUB_USERNAME }}
         password: ${{ secrets.PUB_PASSWORD }}
+    - name: Coverage
+      if: ${{ matrix.python-version == 3.7 }}
+      run: |
+        make coverage
     - name: Publish coverage 1
       if: ${{ matrix.python-version == 3.7 }}
       uses: appleboy/ssh-action@master
