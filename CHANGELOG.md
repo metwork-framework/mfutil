@@ -4,6 +4,8 @@
 ## [Unreleased]
 
 ### New Features
+- wrapping exception support in MFUtilException
+- drop layerapi2 and glib2 utility functions
 - remove plugins features (moved to mfplugin repository)
 - better error message for BashWrapper exceptions
 - better packaging of dependencies
