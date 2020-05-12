@@ -39,6 +39,7 @@ setup(
             "get_domainname = mfutil.cli_tools.get_domainname:main",
             "get_real_ip = mfutil.cli_tools.get_real_ip:main",
             "ping_tcp_port = mfutil.cli_tools.ping_tcp_port:main",
+            "mfprogress = mfutil.cli_tools.mfprogress:main",
             "recursive_kill.py = mfutil.cli_tools.recursive_kill:main",
         ]
     }
