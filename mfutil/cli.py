@@ -1,28 +1,64 @@
-"""Utility functions to build CLI."""
+# -*- coding: utf-8 -*-
+"""Utility functions to build CLI (Python >= 3.6 only)."""
 
 from __future__ import print_function
 import six
-import os
 import sys
+try:
+    from rich.progress import Progress, BarColumn, ProgressColumn, \
+        TimeRemainingColumn
+    from rich.text import Text
+    from rich.bar import Bar
+    from rich.table import Table
+    from rich.segment import Segment
+    from rich.console import Console
+except ImportError:
+    class Dummy():
+        pass
+    TimeRemainingColumn = Dummy
+    BarColumn = Dummy
+    ProgressColumn = Dummy
+    Progress = Dummy
+    Bar = Dummy
+
 from mfutil.exc import MFUtilException
+
+__pdoc__ = {
+    "MFTimeRemainingColumn": False,
+    "StateColumn": False,
+    "MFBar": False,
+    "MFBarColumn": False
+}
+
+_STDOUT_CONSOLE = None
+_STDERR_CONSOLE = None
+
+
+def _get_console(**kwargs):
+    global _STDOUT_CONSOLE, _STDERR_CONSOLE
+    if len(kwargs) > 1 or \
+            (len(kwargs) == 1 and
+             (kwargs.get('file', None) not in (sys.stdout, sys.stderr))):
+        return Console(**kwargs)
+    file = kwargs.get('file', None)
+    if file == sys.stdout:
+        if _STDOUT_CONSOLE is None:
+            _STDOUT_CONSOLE = Console(**kwargs)
+        return _STDOUT_CONSOLE
+    elif file == sys.stderr:
+        if _STDERR_CONSOLE is None:
+            _STDERR_CONSOLE = Console(**kwargs)
+        return _STDERR_CONSOLE
+    return Console(**kwargs)
+
+
+def _is_interactive(f):
+    c = _get_console(file=f)
+    return c.is_terminal
 
 
 def is_interactive(target=None):
     """Return True if we are in an interactive terminal.
-
-    For historical reasons, the following algorithm is used to determine
-    if we are in an interactive terminal or not:
-
-    - if the `NOINTERACTIVE` env var is set to 1 => we return False
-    - if the `/tmp/nointeractive` file exists => we return False
-    - if target is None:
-        - if stdout AND stderr are a tty => we return True (else False)
-    - elif target == "stdout":
-        - if stdout is a tty => we return True (else False)
-    - elif target == "stderr":
-        - if stderr is a tty => we return True (else False)
-    - else:
-        - we raise a MFUtilException
 
     Args:
         target (string): can be None (for stdout AND stderr checking),
@@ -36,16 +72,12 @@ def is_interactive(target=None):
         MFUtilException: if target is invalid
 
     """
-    if os.environ.get("NOINTERACTIVE", "").strip() == "1":
-        return False
-    if os.path.isfile("/tmp/nointeractive"):
-        return False
     if target is None:
-        return sys.stdout.isatty() and sys.stderr.isatty()
+        return _is_interactive(sys.stdout) and _is_interactive(sys.stderr)
     elif target == "stdout":
-        return sys.stdout.isatty()
+        return _is_interactive(sys.stdout)
     elif target == "stderr":
-        return sys.stderr.isatty()
+        return _is_interactive(sys.stderr)
     else:
         raise MFUtilException("invalid target parameter: %s" % target)
 
@@ -89,7 +121,7 @@ def echo_warning(message=""):
         echo_clean()
         print("\033[60G[ \033[33mWARNING\033[0;0m ] %s" % message)
     else:
-        print( "[ WARNING ] %s" % message)
+        print("[ WARNING ] %s" % message)
 
 
 def echo_bold(message):
@@ -133,3 +165,277 @@ def echo_clean():
     """Clean waiting status."""
     if is_interactive("stdout"):
         print("\033[60G[ \033           ", end="")
+
+
+class StateColumn(ProgressColumn):
+
+    def render(self, task):
+        if task.finished:
+            extra = task.fields.get('status_extra', '')
+            if len(extra) > 0:
+                extra = " (%s)" % extra
+            if task.fields.get('status', 'OK') == 'NOK':
+                return Text.assemble(Text("[ "),
+                                     Text("NOK", style="red"),
+                                     Text(" ]%s" % extra))
+            elif task.fields.get('status', 'OK') == 'WARNING':
+                return Text.assemble(Text("[ "),
+                                     Text("WARNING", style="yellow"),
+                                     Text(" ]%s" % extra))
+            else:
+                return Text.assemble(Text("[ "),
+                                     Text("OK", style="green"),
+                                     Text(" ]%s" % extra))
+        else:
+            return Text.assemble(Text("[ "),
+                                 Text("RUNNING", style="yellow"),
+                                 Text(" ]"))
+
+
+class MFTimeRemainingColumn(TimeRemainingColumn):
+
+    def render(self, task):
+        if task.finished:
+            return Text("")
+        else:
+            return TimeRemainingColumn.render(self, task)
+
+
+class MFBar(Bar):
+    """Note: we override Bar only to change bar value when completed."""
+
+    def __console__(self, console, options):
+        completed = min(self.total, max(0, self.completed))
+        width = min(self.width or options.max_width, options.max_width)
+        # <real override>
+        if self.completed < self.total:
+            bar = "━"
+        else:
+            bar = " "
+        # </real override>
+        half_bar_right = "╸"
+        half_bar_left = "╺"
+        complete_halves = int(width * 2 * completed / self.total)
+        bar_count = complete_halves // 2
+        half_bar_count = complete_halves % 2
+        style = console.get_style(self.style)
+        complete_style = console.get_style(
+            self.complete_style if self.completed < self.total
+            else self.finished_style
+        )
+        if bar_count:
+            yield Segment(bar * bar_count, complete_style)
+        if half_bar_count:
+            yield Segment(half_bar_right * half_bar_count, complete_style)
+
+        remaining_bars = width - bar_count - half_bar_count
+        if remaining_bars:
+            if not half_bar_count and bar_count:
+                yield Segment(half_bar_left, style)
+                remaining_bars -= 1
+            if remaining_bars:
+                yield Segment(bar * remaining_bars, style)
+
+
+class MFBarColumn(BarColumn):
+
+    def render(self, task):
+        return MFBar(total=task.total, completed=task.completed,
+                     width=self.bar_width)
+
+
+class MFProgress(Progress):
+    """[Rich Progress](https://rich.readthedocs.io/en/latest/progress.html) child class.
+
+    This class add three features to the original one:
+
+    - support (basic) rendering in non-terminal
+    - task status management
+    - different default columns setup (but you can override this)
+    - rendering on stdout by default (but you can change this by providing
+        a custom Console object)
+
+    You can use it exactly like the original [Progress class](https://rich.readthedocs.io/en/latest/reference/progress.html):
+
+    ```python
+    import time
+    from mfutil.cli import MFProgress
+
+    with MFProgress() as progress:
+        t1 = p.add_task("Foo task")
+        t2 = p.add_task("Foo task")
+        while not progress.finished:
+            progress.update(t1, advance=10)
+            progress.update(t2, advance=10)
+            time.sleep(1)
+    ```
+
+    For status management:
+
+    - if you leave MFProgress context manager, not finished tasks are
+        automatically set to `NOK` state, finished tasks are automatically
+        set to `OK` state
+    - you have 3 new methods to manually override this behaviour:
+        (complete_task(), complete_task_nok(), complete_task_warning())
+
+    Example:
+
+    ```python
+    import time
+    from mfutil.cli import MFProgress
+
+    with MFProgress() as progress:
+        t1 = p.add_task("Foo task")
+        t2 = p.add_task("Foo task")
+        i = 0
+        while not progress.finished:
+            progress.update(t1, advance=10)
+            if i < 5:
+                progress.update(t2, advance=10)
+            elif i == 5:
+                progress.complete_task_failed(t2, "unknown error")
+            time.sleep(1)
+            i = i + 1
+    ```
+
+    """
+    def __init__(self, *args, **kwargs):
+        console = kwargs.get("console", None)
+        if not console:
+            self._interactive = _is_interactive(sys.stdout)
+            kwargs["console"] = Console()
+        else:
+            self._interactive = _is_interactive(console.file)
+        if len(args) == 0:
+            columns = ["[progress.description]{task.description}",
+                       MFBarColumn(12),
+                       StateColumn(),
+                       MFTimeRemainingColumn()]
+            self.mfprogress_columns = True
+        else:
+            columns = args
+            self.mfprogress_columns = False
+        Progress.__init__(self, *columns, **kwargs)
+
+    @property
+    def _table(self):
+        if self.mfprogress_columns:
+            return self._mfprogress_table()
+        else:
+            return MFProgress._table(self)
+
+    def _mfprogress_table(self):
+        """Get a table to render the Progress display."""
+        table = Table.grid()
+        table.pad_edge = True
+        table.padding = (0, 1, 0, 0)
+        try:
+            finished = self.finished
+        except Exception:
+            finished = False
+        if finished:
+            table.add_column(width=57, no_wrap=True)
+            table.add_column(width=0)
+            table.add_column()
+            table.add_column()
+        else:
+            table.add_column(width=45, no_wrap=True)
+            table.add_column()
+            table.add_column()
+            table.add_column()
+        for _, task in self._tasks.items():
+            if task.visible:
+                row = []
+                append = row.append
+                for index, column in enumerate(self.columns):
+                    if isinstance(column, str):
+                        txt = column.format(task=task)
+                        if finished:
+                            if len(txt) > 79:
+                                txt = txt[0:74] + "[[...]]"
+                        else:
+                            if len(txt) > 67:
+                                txt = txt[0:62] + "[[...]]"
+                        append(txt)
+                        table.columns[index].no_wrap = True
+                    else:
+                        widget = column(task)
+                        append(widget)
+                        if isinstance(widget, (str, Text)):
+                            table.columns[index].no_wrap = True
+                table.add_row(*row)
+        return table
+
+    def __exit__(self, *args, **kwargs):
+        for tid, task in self._tasks.items():
+            if not task.finished:
+                self.complete_task_nok(tid)
+        Progress.__exit__(self, *args, **kwargs)
+
+    def start(self, *args, **kwargs):
+        if self._interactive:
+            return Progress.start(self, *args, **kwargs)
+
+    def _failed(self, task_id, status_extra=""):
+        task = self._tasks[task_id]
+        self.update(task_id, completed=task.total, status="NOK",
+                    refresh=True, status_extra=status_extra)
+
+    def complete_task_nok(self, task_id, status_extra=""):
+        """Complete a task with NOK status.
+
+        Args:
+            task_id (TaskID): a task ID.
+            status_extra (str): a little extra message to add.
+
+        """
+        task = self._tasks[task_id]
+        self.update(task_id, completed=task.total, status="NOK",
+                    refresh=True, status_extra=status_extra)
+
+    def complete_task_warning(self, task_id, status_extra=""):
+        """Complete a task with WARNING status.
+
+        Args:
+            task_id (TaskID): a task ID.
+            status_extra (str): a little extra message to add.
+
+        """
+        task = self._tasks[task_id]
+        self.update(task_id, completed=task.total, status="WARNING",
+                    refresh=True, status_extra=status_extra)
+
+    def complete_task(self, task_id, status_extra=""):
+        """Complete a task with OK status.
+
+        Args:
+            task_id (TaskID): a task ID.
+            status_extra (str): a little extra message to add.
+
+        """
+        task = self._tasks[task_id]
+        self.update(task_id, completed=task.total, status="OK",
+                    refresh=True, status_extra=status_extra)
+
+    def stop(self):
+        if self._interactive:
+            return Progress.stop(self)
+        else:
+            for tid, task in self._tasks.items():
+                status = ""
+                extra = task.fields.get('status_extra', '')
+                if len(extra) > 0:
+                    extra = " (%s)" % extra
+                if task.finished:
+                    if task.fields.get('status', 'OK') == 'OK':
+                        status = "OK"
+                    elif task.fields.get('status', 'OK') == 'WARNING':
+                        status = "WARNING"
+                    else:
+                        status = "NOK"
+                print("%s [ %s ]%s" % (task.description, status, extra),
+                      file=self.console.file)
+
+    def refresh(self, *args, **kwargs):
+        if self._interactive:
+            return Progress.refresh(self, *args, **kwargs)
