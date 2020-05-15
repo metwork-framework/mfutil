@@ -10,7 +10,6 @@ try:
     from rich.text import Text
     from rich.bar import Bar
     from rich.table import Table
-    from rich.segment import Segment
     from rich.console import Console
 except ImportError:
     class Dummy():
@@ -25,9 +24,7 @@ from mfutil.exc import MFUtilException
 
 __pdoc__ = {
     "MFTimeRemainingColumn": False,
-    "StateColumn": False,
-    "MFBar": False,
-    "MFBarColumn": False
+    "StateColumn": False
 }
 
 _STDOUT_CONSOLE = None
@@ -201,49 +198,6 @@ class MFTimeRemainingColumn(TimeRemainingColumn):
             return TimeRemainingColumn.render(self, task)
 
 
-class MFBar(Bar):
-    """Note: we override Bar only to change bar value when completed."""
-
-    def __console__(self, console, options):
-        completed = min(self.total, max(0, self.completed))
-        width = min(self.width or options.max_width, options.max_width)
-        # <real override>
-        if self.completed < self.total:
-            bar = "━"
-        else:
-            bar = " "
-        # </real override>
-        half_bar_right = "╸"
-        half_bar_left = "╺"
-        complete_halves = int(width * 2 * completed / self.total)
-        bar_count = complete_halves // 2
-        half_bar_count = complete_halves % 2
-        style = console.get_style(self.style)
-        complete_style = console.get_style(
-            self.complete_style if self.completed < self.total
-            else self.finished_style
-        )
-        if bar_count:
-            yield Segment(bar * bar_count, complete_style)
-        if half_bar_count:
-            yield Segment(half_bar_right * half_bar_count, complete_style)
-
-        remaining_bars = width - bar_count - half_bar_count
-        if remaining_bars:
-            if not half_bar_count and bar_count:
-                yield Segment(half_bar_left, style)
-                remaining_bars -= 1
-            if remaining_bars:
-                yield Segment(bar * remaining_bars, style)
-
-
-class MFBarColumn(BarColumn):
-
-    def render(self, task):
-        return MFBar(total=task.total, completed=task.completed,
-                     width=self.bar_width)
-
-
 class MFProgress(Progress):
     """[Rich Progress](https://rich.readthedocs.io/en/latest/progress.html) child class.
 
@@ -308,7 +262,7 @@ class MFProgress(Progress):
             self._interactive = _is_interactive(console.file)
         if len(args) == 0:
             columns = ["[progress.description]{task.description}",
-                       MFBarColumn(12),
+                       BarColumn(12),
                        StateColumn(),
                        MFTimeRemainingColumn()]
             self.mfprogress_columns = True
@@ -317,14 +271,13 @@ class MFProgress(Progress):
             self.mfprogress_columns = False
         Progress.__init__(self, *columns, **kwargs)
 
-    @property
-    def _table(self):
+    def make_tasks_table(self, tasks):
         if self.mfprogress_columns:
-            return self._mfprogress_table()
+            return self._mfprogress_make_tasks_table(tasks)
         else:
-            return MFProgress._table(self)
+            return MFProgress.make_tasks_table(self, tasks)
 
-    def _mfprogress_table(self):
+    def _mfprogress_make_tasks_table(self, tasks):
         """Get a table to render the Progress display."""
         table = Table.grid()
         table.pad_edge = True
@@ -343,7 +296,7 @@ class MFProgress(Progress):
             table.add_column()
             table.add_column()
             table.add_column()
-        for _, task in self._tasks.items():
+        for task in tasks:
             if task.visible:
                 row = []
                 append = row.append
@@ -367,19 +320,15 @@ class MFProgress(Progress):
         return table
 
     def __exit__(self, *args, **kwargs):
-        for tid, task in self._tasks.items():
-            if not task.finished:
-                self.complete_task_nok(tid)
+        with self._lock:
+            for tid, task in self._tasks.items():
+                if not task.finished:
+                    self.complete_task_nok(tid)
         Progress.__exit__(self, *args, **kwargs)
 
     def start(self, *args, **kwargs):
         if self._interactive:
             return Progress.start(self, *args, **kwargs)
-
-    def _failed(self, task_id, status_extra=""):
-        task = self._tasks[task_id]
-        self.update(task_id, completed=task.total, status="NOK",
-                    refresh=True, status_extra=status_extra)
 
     def complete_task_nok(self, task_id, status_extra=""):
         """Complete a task with NOK status.
@@ -389,9 +338,10 @@ class MFProgress(Progress):
             status_extra (str): a little extra message to add.
 
         """
-        task = self._tasks[task_id]
-        self.update(task_id, completed=task.total, status="NOK",
-                    refresh=True, status_extra=status_extra)
+        with self._lock:
+            task = self._tasks[task_id]
+            self.update(task_id, completed=task.total, status="NOK",
+                        refresh=False, status_extra=status_extra)
 
     def complete_task_warning(self, task_id, status_extra=""):
         """Complete a task with WARNING status.
@@ -401,9 +351,10 @@ class MFProgress(Progress):
             status_extra (str): a little extra message to add.
 
         """
-        task = self._tasks[task_id]
-        self.update(task_id, completed=task.total, status="WARNING",
-                    refresh=True, status_extra=status_extra)
+        with self._lock:
+            task = self._tasks[task_id]
+            self.update(task_id, completed=task.total, status="WARNING",
+                        refresh=False, status_extra=status_extra)
 
     def complete_task(self, task_id, status_extra=""):
         """Complete a task with OK status.
@@ -413,28 +364,30 @@ class MFProgress(Progress):
             status_extra (str): a little extra message to add.
 
         """
-        task = self._tasks[task_id]
-        self.update(task_id, completed=task.total, status="OK",
-                    refresh=True, status_extra=status_extra)
+        with self._lock:
+            task = self._tasks[task_id]
+            self.update(task_id, completed=task.total, status="OK",
+                        refresh=False, status_extra=status_extra)
 
     def stop(self):
         if self._interactive:
             return Progress.stop(self)
         else:
-            for tid, task in self._tasks.items():
-                status = ""
-                extra = task.fields.get('status_extra', '')
-                if len(extra) > 0:
-                    extra = " (%s)" % extra
-                if task.finished:
-                    if task.fields.get('status', 'OK') == 'OK':
-                        status = "OK"
-                    elif task.fields.get('status', 'OK') == 'WARNING':
-                        status = "WARNING"
-                    else:
-                        status = "NOK"
-                print("%s [ %s ]%s" % (task.description, status, extra),
-                      file=self.console.file)
+            with self._lock:
+                for tid, task in self._tasks.items():
+                    status = ""
+                    extra = task.fields.get('status_extra', '')
+                    if len(extra) > 0:
+                        extra = " (%s)" % extra
+                    if task.finished:
+                        if task.fields.get('status', 'OK') == 'OK':
+                            status = "OK"
+                        elif task.fields.get('status', 'OK') == 'WARNING':
+                            status = "WARNING"
+                        else:
+                            status = "NOK"
+                    print("%s [ %s ]%s" % (task.description, status, extra),
+                          file=self.console.file)
 
     def refresh(self, *args, **kwargs):
         if self._interactive:
