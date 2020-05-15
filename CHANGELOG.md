@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- add rich component and add a progress bar class
 - wrapping exception support in MFUtilException
 - drop layerapi2 and glib2 utility functions
 - remove plugins features (moved to mfplugin repository)
