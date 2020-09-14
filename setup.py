@@ -28,6 +28,7 @@ else:
 
 setup(
     name='mfutil',
+    url="https://github.com/metwork-framework/mfutil",
     packages=find_packages(),
     install_requires=required,
     dependency_links=dependency_links,
