@@ -52,14 +52,14 @@ jobs:
         password: ${{ secrets.PUB_PASSWORD }}
         port: 22
         script: |
-          rm -Rf doc
-          mkdir doc
+          rm -Rf /pub/misc/mfutil/doc
+          mkdir /pub/misc/mfutil/doc
     - name: Publish doc 2
       if: ${{ matrix.python-version == 3.7 }}
       uses: garygrossgarten/github-action-scp@release
       with:
         local: html/mfutil
-        remote: doc
+        remote: /pub/misc/mfutil/doc
         host: ${{ secrets.PUB_HOST }}
         username: ${{ secrets.PUB_USERNAME }}
         password: ${{ secrets.PUB_PASSWORD }}
@@ -76,14 +76,14 @@ jobs:
         password: ${{ secrets.PUB_PASSWORD }}
         port: 22
         script: |
-          rm -Rf coverage
-          mkdir coverage
+          rm -Rf /pub/misc/mfutil/coverage
+          mkdir /pub/misc/mfutil/coverage
     - name: Publish coverage 2
       if: ${{ matrix.python-version == 3.7 }}
       uses: garygrossgarten/github-action-scp@release
       with:
         local: htmlcov
-        remote: coverage
+        remote: /pub/misc/mfutil/coverage
         host: ${{ secrets.PUB_HOST }}
         username: ${{ secrets.PUB_USERNAME }}
         password: ${{ secrets.PUB_PASSWORD }}
