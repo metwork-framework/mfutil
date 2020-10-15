@@ -27,6 +27,7 @@ else:
     required.append("inotify_simple==1.2.1")
 
 setup(
+    version="0.0.0",
     name='mfutil',
     url="https://github.com/metwork-framework/mfutil",
     packages=find_packages(),
