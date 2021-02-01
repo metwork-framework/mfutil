@@ -10,11 +10,13 @@ import rich
 from rich.panel import Panel
 
 DESCRIPTION = "execute a command with a nice progressbar"
+STOP_FLAG = False
 
 
 def thread_advance(progress, tid, timeout):
+    global STOP_FLAG
     i = 1
-    while i < timeout:
+    while i < timeout and not STOP_FLAG:
         progress.update(tid, advance=1)
         time.sleep(1)
         i = i + 1
@@ -51,6 +53,7 @@ def main():
                              daemon=True)
         x.start()
         bw = BashWrapper(command)
+        STOP_FLAG = True
         if bw:
             progress.complete_task(t)
         else:

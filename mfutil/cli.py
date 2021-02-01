@@ -171,9 +171,9 @@ class StateColumn(ProgressColumn):
             extra = task.fields.get('status_extra', '')
             if len(extra) > 0:
                 extra = " (%s)" % extra
-            if task.fields.get('status', 'OK') == 'NOK':
+            if task.fields.get('status', 'OK') == 'ERROR':
                 return Text.assemble(Text("[ "),
-                                     Text("NOK", style="red"),
+                                     Text("ERROR", style="red"),
                                      Text(" ]%s" % extra))
             elif task.fields.get('status', 'OK') == 'WARNING':
                 return Text.assemble(Text("[ "),
@@ -227,7 +227,7 @@ class MFProgress(Progress):
     For status management:
 
     - if you leave MFProgress context manager, not finished tasks are
-        automatically set to `NOK` state, finished tasks are automatically
+        automatically set to `ERROR` state, finished tasks are automatically
         set to `OK` state
     - you have 3 new methods to manually override this behaviour:
         (complete_task(), complete_task_nok(), complete_task_warning())
@@ -331,7 +331,7 @@ class MFProgress(Progress):
             return Progress.start(self, *args, **kwargs)
 
     def complete_task_nok(self, task_id, status_extra=""):
-        """Complete a task with NOK status.
+        """Complete a task with ERROR status.
 
         Args:
             task_id (TaskID): a task ID.
@@ -385,7 +385,7 @@ class MFProgress(Progress):
                         elif task.fields.get('status', 'OK') == 'WARNING':
                             status = "WARNING"
                         else:
-                            status = "NOK"
+                            status = "ERROR"
                     print("%s [ %s ]%s" % (task.description, status, extra),
                           file=self.console.file)
 
