@@ -340,7 +340,7 @@ class MFProgress(Progress):
         """
         with self._lock:
             task = self._tasks[task_id]
-            self.update(task_id, completed=task.total, status="NOK",
+            self.update(task_id, completed=task.total, status="ERROR",
                         refresh=False, status_extra=status_extra)
 
     def complete_task_warning(self, task_id, status_extra=""):

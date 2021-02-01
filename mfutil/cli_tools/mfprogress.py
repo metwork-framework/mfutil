@@ -28,6 +28,9 @@ def main():
     parser.add_argument("--timeout",
                         help="timeout (in seconds)", type=int,
                         default=180)
+    parser.add_argument("--title",
+                        help="title of the command", type=str,
+                        default="title of the command")
     parser.add_argument("--silent", action="store_true",
                         help="if set, we don't add a debug output in case of "
                         "errors")
@@ -42,7 +45,7 @@ def main():
     status = True
     timeout = False
     with MFProgress() as progress:
-        t = progress.add_task("FIXME...", total=args.timeout)
+        t = progress.add_task(args.title, total=args.timeout)
         x = threading.Thread(target=thread_advance, args=(progress, t,
                                                           args.timeout),
                              daemon=True)
