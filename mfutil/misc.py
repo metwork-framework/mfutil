@@ -334,6 +334,13 @@ def add_inotify_watch(inotify, directory, ignores=[]):
 
 def _kill_process_and_children(process):
     children = None
+    all_children = None
+    # First we keep the full view of the process tree to kill
+    try:
+        all_children = process.children(recursive=True)
+    except psutil.NoSuchProcess:
+        pass
+    # Then, we keep just immediate children to kill in the "good" order
     try:
         children = process.children(recursive=False)
     except psutil.NoSuchProcess:
@@ -344,6 +351,10 @@ def _kill_process_and_children(process):
         pass
     if children is not None:
         for child in children:
+            _kill_process_and_children(child)
+    # To be sure, we didn't miss something, we kill the initial full list
+    if all_children is not None:
+        for child in all_children:
             _kill_process_and_children(child)
 
 
