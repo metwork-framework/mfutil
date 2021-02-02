@@ -4,22 +4,35 @@ import argparse
 import threading
 import time
 import sys
+import os
 from mfutil.cli import MFProgress
+from mfutil.misc import kill_process_and_children
 from mfutil.bash_wrapper import BashWrapper
 import rich
+import psutil
 from rich.panel import Panel
 
 DESCRIPTION = "execute a command with a nice progressbar"
+TIMEOUT_FLAG = False
 STOP_FLAG = False
 
 
 def thread_advance(progress, tid, timeout):
-    global STOP_FLAG
+    global TIMEOUT_FLAG, STOP_FLAG
     i = 1
-    while i < timeout and not STOP_FLAG:
-        progress.update(tid, advance=1)
+    while i <= timeout and not STOP_FLAG:
+        if i < timeout:
+            progress.update(tid, advance=1)
         time.sleep(1)
         i = i + 1
+    if not STOP_FLAG:
+        # timeout
+        TIMEOUT_FLAG = True
+        current_pid = os.getpid()
+        process = psutil.Process(current_pid)
+        children = process.children(recursive=False)
+        print(children)
+        [kill_process_and_children(x.pid) for x in children]
 
 
 def main():
@@ -38,11 +51,7 @@ def main():
                         "errors")
     args = parser.parse_args()
 
-    cmd = " ".join([args.COMMAND] + args.COMMAND_ARG)
-    if args.timeout == 0:
-        command = cmd
-    else:
-        command = "timeout --kill-after=3 %is %s" % (args.timeout, cmd)
+    command = " ".join([args.COMMAND] + args.COMMAND_ARG)
 
     status = True
     timeout = False
@@ -53,11 +62,11 @@ def main():
                              daemon=True)
         x.start()
         bw = BashWrapper(command)
-        STOP_FLAG = True
+        STOP_FLAG = True  # noqa:
         if bw:
             progress.complete_task(t)
         else:
-            if bw.code == 124 or bw.code == 137:
+            if TIMEOUT_FLAG:
                 # timeout
                 progress.complete_task_nok(t, "timeout")
                 timeout = True
