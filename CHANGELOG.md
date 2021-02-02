@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### New Features
+
+- add title option to mfprogress utility
+
+### Bug Fixes
+
+- better recursive kill
+- fix NOK state
+
 ## v0.1.1 (2020-10-15)
 
 - No interesting change
