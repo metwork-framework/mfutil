@@ -31,7 +31,6 @@ def thread_advance(progress, tid, timeout):
         current_pid = os.getpid()
         process = psutil.Process(current_pid)
         children = process.children(recursive=False)
-        print(children)
         [kill_process_and_children(x.pid) for x in children]
 
 
