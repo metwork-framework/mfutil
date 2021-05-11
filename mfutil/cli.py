@@ -88,7 +88,9 @@ def echo_ok(message=""):
     """
     if is_interactive("stdout"):
         echo_clean()
-        print("\033[60G[ \033[32mOK\033[0;0m ] %s" % message)
+        print("\033[60G[ \033[32mOK\033[0;0m ] %s%s" % (
+            message, " " * (13 - len(message)))
+        )
     else:
         print(" [ OK ] %s" % message)
 
@@ -102,7 +104,9 @@ def echo_nok(message=""):
     """
     if is_interactive("stdout"):
         echo_clean()
-        print("\033[60G[ \033[31mERROR\033[0;0m ] %s" % message)
+        print("\033[60G[ \033[31mERROR\033[0;0m ] %s%s" % (
+            message, " " * (10 - len(message)))
+        )
     else:
         print(" [ ERROR ] %s" % message)
 
