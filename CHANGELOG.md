@@ -10,6 +10,7 @@
 
 - better recursive kill
 - fix NOK state
+- fix some minor display issues with some specific term emulator
 
 ## v0.1.1 (2020-10-15)
 
