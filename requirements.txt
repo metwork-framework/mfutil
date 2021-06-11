@@ -5,5 +5,5 @@ psutil
 inotify_simple==1.2.1; python_version < '3.0'
 inotify_simple; python_version >= '3.0'
 netifaces
-rich>=1.1.3; python_version >= '3.6'
+rich>=1.2.3; python_version >= '3.6'
 simpleeval>=0.9.10

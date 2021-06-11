@@ -334,6 +334,11 @@ class MFProgress(Progress):
         if self._interactive:
             return Progress.start(self, *args, **kwargs)
 
+    def __complete_task_nok_nolock(self, task_id, status_extra=""):
+        task = self._tasks[task_id]
+        self.update(task_id, completed=task.total, status="ERROR",
+                    refresh=False, status_extra=status_extra)
+
     def complete_task_nok(self, task_id, status_extra=""):
         """Complete a task with ERROR status.
 
@@ -343,9 +348,7 @@ class MFProgress(Progress):
 
         """
         with self._lock:
-            task = self._tasks[task_id]
-            self.update(task_id, completed=task.total, status="ERROR",
-                        refresh=False, status_extra=status_extra)
+            self.__complete_task_nok_nolock(task_id, status_extra=status_extra)
 
     def complete_task_warning(self, task_id, status_extra=""):
         """Complete a task with WARNING status.
