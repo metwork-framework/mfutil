@@ -105,8 +105,9 @@ def mkdir_p(path, nodebug=False, nowarning=False):
             if not nowarning:
                 __get_logger().warning("can't create %s directory", path)
             return False
-    if not nodebug:
-        __get_logger().debug("%s directory created", path)
+    #We do not log debug message because it is logged in circus configuration file 
+    #if not nodebug:
+    #    __get_logger().debug("%s directory created", path)
     return True
 
 
