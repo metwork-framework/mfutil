@@ -12,6 +12,7 @@
 - fix NOK state
 - fix some minor display issues with some specific term emulator
 - fix deadlock issue in rich library
+- remove debug log message leading to problems
 
 ## v0.1.1 (2020-10-15)
 
