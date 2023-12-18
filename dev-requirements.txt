@@ -5,3 +5,4 @@ pdoc3
 coverage
 pytest
 pytest-cov
+setuptools; python_version > '3.11'
