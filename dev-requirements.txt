@@ -1,7 +1,7 @@
 -r requirements.txt
 flake8
 mock
-pdoc3<14.0.0; python_version < '3.8'
+pdoc3<0.11.0; python_version < '3.8'
 pdoc3; python_version >= '3.8'
 coverage
 pytest
