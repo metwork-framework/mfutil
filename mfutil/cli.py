@@ -214,8 +214,8 @@ class MFProgress(Progress):
     - rendering on stdout by default (but you can change this by providing
         a custom Console object)
 
-    You can use it exactly like the original
-    [Progress class](https://rich.readthedocs.io/en/latest/reference/progress.html):
+    You can use it exactly like the original [Progress class]
+    (https://rich.readthedocs.io/en/latest/reference/progress.html):
 
     ```python
     import time

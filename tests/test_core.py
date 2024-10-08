@@ -44,7 +44,7 @@ class TestCase1(TestCase):
     def test_get_ipv4_for_hostname(self):
         self.assertEqual(get_ipv4_for_hostname('localhost'), '127.0.0.1')
         self.assertEqual(get_ipv4_for_hostname('localhost.localdomain'),
-            '127.0.0.1')
+                         '127.0.0.1')
         self.assertEqual(get_ipv4_for_hostname('127.0.0.1'), '127.0.0.1')
         self.assertEqual(get_ipv4_for_hostname('1.2.3.4'), '1.2.3.4')
         x = get_ipv4_for_hostname('foo.bar.doesnotexist')
