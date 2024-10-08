@@ -25,7 +25,7 @@ class _Eval(EvalWithCompoundTypes):
         super().__init__(operators, functions, names)
 
         self.nodes.update({
-            ast.Bytes: self._eval_bytes,
+            ast.Constant: self._eval_bytes,
         })
 
     @staticmethod
@@ -39,8 +39,6 @@ def _partialclass(cls, *args, **kwargs):
         if sys.version_info.major >= 3:
             __init__ = functools.partialmethod(cls.__init__, *args, **kwargs)
         else:
-            # FIXME : this does not work with python2
-            # We can't use functools.partial on __init__ function
             __init__ = functools.partial(cls.__init__, *args, **kwargs)
 
     return NewCls
