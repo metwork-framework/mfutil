@@ -41,7 +41,6 @@ jobs:
       run: |
         make test
     - name: Doc
-      if: ${{ matrix.python-version == 3.7 }}
       run: |
         make doc
     - name: Publish doc
@@ -61,7 +60,6 @@ jobs:
         scp: |
             '${LOCAL}/*' => ${REMOTE}
     - name: Coverage
-      if: ${{ matrix.python-version == 3.7 }}
       run: |
         make coverage
     - name: Publish coverage
