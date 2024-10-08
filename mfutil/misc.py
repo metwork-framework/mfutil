@@ -70,7 +70,14 @@ def get_utc_unix_timestamp():
         (int) a int corresponding to the current unix utc timestamp.
 
     """
-    dts = datetime.datetime.utcnow()
+
+    # utcnow() is deprecated  and should be replaced by now(datetime.UTC)
+    #   (for python >= 3.11)
+    try:
+        dts = datetime.datetime.now(datetime.UTC)
+    except Exception:
+        dts = datetime.datetime.utcnow()
+
     return int(time.mktime(dts.timetuple()))
 
 
