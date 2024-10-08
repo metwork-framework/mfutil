@@ -4,5 +4,5 @@ bash
 psutil
 inotify_simple
 netifaces
-rich>=1.2.3; python_version >= '3.6'
+rich>=1.2.3
 simpleeval>=0.9.13

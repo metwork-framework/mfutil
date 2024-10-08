@@ -21,18 +21,15 @@ with open('requirements.txt') as reqs:
         else:
             required.append(line)
 
-if sys.version_info > (3, 0, 0):
-    required.append("inotify_simple")
-else:
-    required.append("inotify_simple==1.2.1")
+required.append("inotify_simple")
 
 setup(
     version="0.2.0",
     name='mfutil',
     url="https://github.com/metwork-framework/mfutil",
-    python_requires>='3.8.0',
     packages=find_packages(),
     install_requires=required,
+    python_requires='>=3.8',
     dependency_links=dependency_links,
     entry_points={
         "console_scripts": [
