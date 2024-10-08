@@ -105,8 +105,9 @@ def mkdir_p(path, nodebug=False, nowarning=False):
             if not nowarning:
                 __get_logger().warning("can't create %s directory", path)
             return False
-    #We do not log debug message because it is logged in circus configuration file 
-    #if not nodebug:
+    # We do not log debug message because it is logged in circus
+    #   configuration file
+    # if not nodebug:
     #    __get_logger().debug("%s directory created", path)
     return True
 
@@ -198,7 +199,8 @@ def get_tmp_filepath(tmp_dir=None, prefix=""):
 
 
 def create_tmp_dirpath(tmp_dir=None, prefix=""):
-    """Create and return a temporary directory inside a father tempory directory.
+    """Create and return a temporary directory inside a father
+    tempory directory.
 
     The dirname is made with get_unique_hexa_identifier() identifier
     so 32 hexa characters.

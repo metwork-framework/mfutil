@@ -25,7 +25,7 @@ class TestCase1(TestCase):
         self.assertTrue(len(x) == 32)
         for c in x:
             if c not in string.hexdigits.lower():
-                raise("Invalid char in identifier")
+                raise "Invalid char in identifier"
         y = get_unique_hexa_identifier()
         self.assertTrue(x != y)
 
@@ -44,7 +44,7 @@ class TestCase1(TestCase):
     def test_get_ipv4_for_hostname(self):
         self.assertEqual(get_ipv4_for_hostname('localhost'), '127.0.0.1')
         self.assertEqual(get_ipv4_for_hostname('localhost.localdomain'),
-                          '127.0.0.1')
+            '127.0.0.1')
         self.assertEqual(get_ipv4_for_hostname('127.0.0.1'), '127.0.0.1')
         self.assertEqual(get_ipv4_for_hostname('1.2.3.4'), '1.2.3.4')
         x = get_ipv4_for_hostname('foo.bar.doesnotexist')
