@@ -1,13 +1,13 @@
 """Generic utility classes and functions."""
 
 __pdoc__ = {
-    "mfutil.jinja2_extensions": False,
-    "mfutil.cli_tools": False,
-    "mfutil.eval": False,
+    "jinja2_extensions": False,
+    "cli_tools": False,
+    "eval": False,
     "BashWrapper": False,
     "BashWrapperException": False,
     "BashWrapperOrRaise": False,
-    "mfutil.exc": False,
+    "exc": False,
     "add_inotify_watch": False,
     "create_tmp_dirpath": False,
     "eval": False,
