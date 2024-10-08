@@ -30,6 +30,7 @@ setup(
     version="0.2.0",
     name='mfutil',
     url="https://github.com/metwork-framework/mfutil",
+    python_requires>='3.8.0',
     packages=find_packages(),
     install_requires=required,
     dependency_links=dependency_links,

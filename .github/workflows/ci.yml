@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
     name: Python ${{ matrix.python-version }}
 
     steps:
@@ -44,7 +44,7 @@ jobs:
       run: |
         make doc
     - name: Publish doc
-      if: ${{ matrix.python-version == 3.7 }}
+      if: ${{ matrix.python-version == 3.8 }}
       uses: thebaptiste/ssh-scp-ssh-pipelines@metwork
       env:
         LOCAL: html/mfutil
@@ -63,7 +63,7 @@ jobs:
       run: |
         make coverage
     - name: Publish coverage
-      if: ${{ matrix.python-version == 3.7 }}
+      if: ${{ matrix.python-version == 3.8 }}
       uses: thebaptiste/ssh-scp-ssh-pipelines@metwork
       env:
         LOCAL: htmlcov
