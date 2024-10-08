@@ -25,12 +25,18 @@ class _Eval(EvalWithCompoundTypes):
         super().__init__(operators, functions, names)
 
         self.nodes.update({
-            ast.Constant: self._eval_bytes,
+            try:
+                ast.Constant: self._eval_bytes,
+            except Exception:
+                ast.Bytes: self._eval_bytes,
         })
 
     @staticmethod
     def _eval_bytes(node):
-        return node.value
+        try:
+            return node.value
+        except Exception:
+            return node.s
 
 
 def _partialclass(cls, *args, **kwargs):
