@@ -9,7 +9,7 @@ import socket
 import psutil
 import pickle
 import hashlib
-import datetime
+from datetime import datetime, timezone
 import time
 import fnmatch
 
@@ -74,9 +74,9 @@ def get_utc_unix_timestamp():
     # utcnow() is deprecated  and should be replaced by now(datetime.UTC)
     #   (for python >= 3.11)
     try:
-        dts = datetime.datetime.now(datetime.UTC)
+        dts = datetime.now(timezone.utc).replace(tzinfo=None)
     except Exception:
-        dts = datetime.datetime.utcnow()
+        dts = datetime.utcnow()
 
     return int(time.mktime(dts.timetuple()))
 
