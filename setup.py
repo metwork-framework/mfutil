@@ -24,7 +24,7 @@ with open('requirements.txt') as reqs:
 required.append("inotify_simple")
 
 setup(
-    version="0.2.0",
+    version="0.3.0",
     name='mfutil',
     url="https://github.com/metwork-framework/mfutil",
     packages=find_packages(),
