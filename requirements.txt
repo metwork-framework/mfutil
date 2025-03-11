@@ -3,6 +3,6 @@ jinja2
 bash
 psutil
 inotify_simple
-netifaces
+netifaces2
 rich>=1.2.3
 simpleeval>=0.9.13
