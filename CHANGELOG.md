@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v0.3.0 (2025-03-11)
+
+### New Features
+
+- prepare the usage of netifaces2 instead of archived netifaces
+- replace netifaces by netifaces2
+
 ## v0.2.0 (2022-10-27)
 
 ### New Features
