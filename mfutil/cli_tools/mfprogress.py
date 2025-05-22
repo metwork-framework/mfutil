@@ -18,7 +18,7 @@ STOP_FLAG = False
 
 
 def thread_advance(progress, tid, timeout):
-    global TIMEOUT_FLAG, STOP_FLAG
+    global TIMEOUT_FLAG
     i = 1
     while i <= timeout and not STOP_FLAG:
         if i < timeout:
