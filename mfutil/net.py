@@ -121,11 +121,13 @@ def _get_real_ip_netifaces():
     try:
         # we try first with the default gateway
         if 'default_gateway' in dir(netifaces):
-            #netifaces2
-            def_gw_device = netifaces.default_gateway(old_api=True)[netifaces.AF_INET][1]
+            # netifaces2
+            def_gw_device = 
+                netifaces.default_gateway(old_api=True)[netifaces.AF_INET][1]
         else:
-            #original netifaces
-            def_gw_device = netifaces.gateways()['default'][netifaces.AF_INET][1]
+            # original netifaces
+            def_gw_device = 
+                netifaces.gateways()['default'][netifaces.AF_INET][1]
         infos = netifaces.ifaddresses(def_gw_device)
         ip = str(infos[netifaces.AF_INET][0]['addr'])
     except Exception:

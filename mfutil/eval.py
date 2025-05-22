@@ -34,6 +34,7 @@ class _Eval(EvalWithCompoundTypes):
 
 def _partialclass(cls, *args, **kwargs):
 
+
     class NewCls(cls):
         if sys.version_info.major >= 3:
             __init__ = functools.partialmethod(cls.__init__, *args, **kwargs)
