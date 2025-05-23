@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Bug Fixes
+
+- fix flake8 error F824
+
 ## v0.3.0 (2025-03-11)
 
 ### New Features
