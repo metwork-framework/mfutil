@@ -32,8 +32,8 @@ class _Eval(EvalWithCompoundTypes):
     def _eval_bytes(node):
         return node.value
 
-def _partialclass(cls, *args, **kwargs):
 
+def _partialclass(cls, *args, **kwargs):
 
     class NewCls(cls):
         if sys.version_info.major >= 3:
