@@ -1,4 +1,3 @@
-import fastentrypoints  # noqa: F401
 import sys
 from setuptools import setup
 from setuptools import find_packages
@@ -24,7 +23,7 @@ with open('requirements.txt') as reqs:
 required.append("inotify_simple")
 
 setup(
-    version="0.3.0",
+    version="0.3.1",
     name='mfutil',
     url="https://github.com/metwork-framework/mfutil",
     packages=find_packages(),
