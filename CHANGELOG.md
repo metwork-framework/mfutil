@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## [Unreleased]
+## v0.3.2 (2025-05-26)
+
+- No interesting change
+
+## v0.3.1 (2025-05-26)
 
 ### Bug Fixes
 
