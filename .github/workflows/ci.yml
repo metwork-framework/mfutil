@@ -8,6 +8,13 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      workflow_branch:
+        description: branch to use
+        required: true
+        type: string
+
 
 jobs:
   build:
